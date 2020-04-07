@@ -1,18 +1,25 @@
 from __future__ import print_function
 
+import os
 import time
 
 import six
 import argparse
 import sys
-from flask import Flask, url_for, jsonify, render_template, request
+from flask import Flask, url_for, jsonify, render_template, request, abort, flash
 import json
 from pymongo import MongoClient
+from werkzeug.utils import secure_filename
+
 from components.standalone_parser import StandaloneParser
 
 app = Flask(__name__)
 parsers = dict()
 client = MongoClient()
+UPLOAD_FOLDER = '/usr1/home/fangzhex/tranx_user_study_uploads'
+ALLOWED_EXTENSIONS = {'zip'}
+USERIDS = {'gneubig', 'frankxu'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def init_arg_parser():
     arg_parser = argparse.ArgumentParser()
@@ -81,6 +88,34 @@ def upload():
     except Exception as e:
         print(e)
         return "failed"
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def authorized(filename):
+    return True
+    splits = filename.split('_')
+    if len(splits) == 3 and splits[0] in USERIDS:
+        return True
+    return False
+
+@app.route("/task_submission", methods=['POST'])
+def submit():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        return '', 401
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        return '', 401
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        if authorized(filename):
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return '', 200
+    return '', 401
 
 
 if __name__ == '__main__':
