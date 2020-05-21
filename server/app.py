@@ -89,16 +89,53 @@ def upload():
         print(e)
         return "failed"
 
+@app.route("/browser_log", methods=['POST'])
+def browser_log():
+    try:
+        req_data = request.get_json()
+        db = client['tranx']
+        collection = db['browser_events']
+        req_data['server_timestamp'] = int(time.time())
+        collection.insert_one(req_data)
+        return "success"
+    except Exception as e:
+        print(e)
+        return "failed"
+
+@app.route("/user_timeline_log", methods=['POST'])
+def user_timeline_log():
+    try:
+        req_data = request.get_json()
+        db = client['tranx']
+        collection = db['user_timeline']
+        req_data['server_timestamp'] = int(time.time())
+        collection.insert_one(req_data)
+        return "success"
+    except Exception as e:
+        print(e)
+        return "failed"
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def authorized(filename):
-    return True
     splits = filename.split('_')
-    if len(splits) == 3 and splits[0] in USERIDS:
-        return True
+    if len(splits) == 3:
+        userid = splits[0]
+        task = splits[1]
+        db = client['tranx']
+        collection = db['user_assignments']
+
+        for record in collection.find({'userid': userid,
+                                       'completion_status': 0}):
+            if task == record['task']:
+                set_as_complete(collection, record['_id'])
+                return True
     return False
+
+def set_as_complete(collection, obj_id):
+    collection.update_one({'_id': obj_id}, {'$set': {'completion_status': 1}})
 
 @app.route("/task_submission", methods=['POST'])
 def submit():
@@ -117,6 +154,31 @@ def submit():
             return '', 200
     return '', 401
 
+
+@app.route("/assign_task", methods=['POST'])
+def assign_task():
+    req_data = request.get_json()
+    userid = req_data['userid']
+    db = client['tranx']
+    collection = db['user_assignments']
+    results = []
+    for record in collection.find({'userid': userid,
+                               'completion_status': 0}):
+        results.append({'task': record['task'], 'use_plugin': record['use_plugin']})
+    return jsonify(results)
+
+@app.route("/get_user_status", methods=['POST'])
+def user_task_status():
+    req_data = request.get_json()
+    userid = req_data['userid']
+    db = client['tranx']
+    collection = db['user_assignments']
+    results = []
+    for record in collection.find({'userid': userid}):
+        results.append({'task': record['task'],
+                        'use_plugin': record['use_plugin'],
+                        'completion_status': record['completion_status']})
+    return jsonify(results)
 
 if __name__ == '__main__':
     args = init_arg_parser().parse_args()
