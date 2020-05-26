@@ -102,6 +102,20 @@ def browser_log():
         print(e)
         return "failed"
 
+@app.route("/keylog", methods=['POST'])
+def keylog():
+    try:
+        req_data = request.get_json()
+        db = client['tranx']
+        collection = db['keylog_events']
+        req_data['server_timestamp'] = int(time.time())
+        collection.insert_one(req_data)
+        return "success"
+    except Exception as e:
+        print(e)
+        return "failed"
+
+
 @app.route("/user_timeline_log", methods=['POST'])
 def user_timeline_log():
     try:
