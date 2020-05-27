@@ -115,6 +115,18 @@ def keylog():
         print(e)
         return "failed"
 
+@app.route("/post_task_study", methods=['POST'])
+def post_task_study():
+    try:
+        req_data = request.get_json()
+        db = client['tranx']
+        collection = db['post_task_survey']
+        req_data['server_timestamp'] = int(time.time())
+        collection.insert_one(req_data)
+        return "success"
+    except Exception as e:
+        print(e)
+        return "failed"
 
 @app.route("/user_timeline_log", methods=['POST'])
 def user_timeline_log():
