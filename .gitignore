@@ -109,3 +109,6 @@ data/
 
 # saved model files
 saved_models/
+
+# decodes files
+decodes/
