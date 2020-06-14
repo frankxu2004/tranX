@@ -38,6 +38,10 @@ def default():
     return render_template('default.html')
 
 
+@app.route("/visualize")
+def visualize():
+    return render_template('visualize.html')
+
 @app.route('/parse/<dataset>', methods=['GET'])
 def parse(dataset):
     utterance = request.args['q']
