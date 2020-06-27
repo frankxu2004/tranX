@@ -18,8 +18,8 @@ parsers = dict()
 client = MongoClient()
 UPLOAD_FOLDER = '/usr1/home/fangzhex/tranx_user_study_uploads'
 ALLOWED_EXTENSIONS = {'zip'}
-USERIDS = {'gneubig', 'frankxu'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 def init_arg_parser():
     arg_parser = argparse.ArgumentParser()
@@ -41,6 +41,7 @@ def default():
 @app.route("/visualize")
 def visualize():
     return render_template('visualize.html')
+
 
 @app.route('/parse/<dataset>', methods=['GET'])
 def parse(dataset):
@@ -93,6 +94,7 @@ def upload():
         print(e)
         return "failed"
 
+
 @app.route("/browser_log", methods=['POST'])
 def browser_log():
     try:
@@ -105,6 +107,7 @@ def browser_log():
     except Exception as e:
         print(e)
         return "failed"
+
 
 @app.route("/keylog", methods=['POST'])
 def keylog():
@@ -119,6 +122,7 @@ def keylog():
         print(e)
         return "failed"
 
+
 @app.route("/post_task_study", methods=['POST'])
 def post_task_study():
     try:
@@ -131,6 +135,7 @@ def post_task_study():
     except Exception as e:
         print(e)
         return "failed"
+
 
 @app.route("/user_timeline_log", methods=['POST'])
 def user_timeline_log():
@@ -145,9 +150,11 @@ def user_timeline_log():
         print(e)
         return "failed"
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def authorized(filename):
     splits = filename.split('_')
@@ -164,8 +171,10 @@ def authorized(filename):
                 return True
     return False
 
+
 def set_as_complete(collection, obj_id):
     collection.update_one({'_id': obj_id}, {'$set': {'completion_status': 1}})
+
 
 @app.route("/task_submission", methods=['POST'])
 def submit():
@@ -193,9 +202,10 @@ def assign_task():
     collection = db['user_assignments']
     results = []
     for record in collection.find({'userid': userid,
-                               'completion_status': 0}):
+                                   'completion_status': 0}):
         results.append({'task': record['task'], 'use_plugin': record['use_plugin']})
     return jsonify(results)
+
 
 @app.route("/get_user_status", methods=['POST'])
 def user_task_status():
@@ -209,6 +219,7 @@ def user_task_status():
                         'use_plugin': record['use_plugin'],
                         'completion_status': record['completion_status']})
     return jsonify(results)
+
 
 if __name__ == '__main__':
     args = init_arg_parser().parse_args()
