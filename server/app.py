@@ -14,11 +14,11 @@ from werkzeug.utils import secure_filename
 from components.standalone_parser import StandaloneParser
 
 app = Flask(__name__)
-parsers = dict()
 client = MongoClient()
 UPLOAD_FOLDER = '/usr1/home/fangzhex/tranx_user_study_uploads'
 ALLOWED_EXTENSIONS = {'zip'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PARSERS'] = dict()
 
 
 def init_arg_parser():
@@ -47,7 +47,7 @@ def visualize():
 def parse(dataset):
     utterance = request.args['q']
 
-    parser = parsers[dataset]
+    parser = app.config['PARSERS'][dataset]
 
     if six.PY2:
         utterance = utterance.encode('utf-8', 'ignore')
@@ -58,11 +58,11 @@ def parse(dataset):
     responses['hypotheses'] = []
 
     for hyp_id, hyp in enumerate(hypotheses):
-        print('------------------ Hypothesis %d ------------------' % hyp_id)
-        print(hyp.code)
-        print(hyp.tree.to_string())
-        print(hyp.score.item())
-        print(hyp.rerank_score.item())
+        # print('------------------ Hypothesis %d ------------------' % hyp_id)
+        # print(hyp.code)
+        # print(hyp.tree.to_string())
+        # print(hyp.score.item())
+        # print(hyp.rerank_score.item())
 
         # print('Actions:')
         # for action_t in hyp.action_infos:
@@ -233,6 +233,6 @@ if __name__ == '__main__':
                                   reranker_path=config['reranker_path'],
                                   cuda=args.cuda)
 
-        parsers[parser_id] = parser
+        app.config['PARSERS'][parser_id] = parser
 
     app.run(host='0.0.0.0', port=args.port, debug=True)
