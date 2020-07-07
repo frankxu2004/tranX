@@ -35,6 +35,8 @@ class StandaloneParser(object):
 
     def parse(self, utterance, debug=False):
         utterance = utterance.strip()
+        if not utterance:
+            return []
         processed_utterance_tokens, utterance_meta = self.example_processor.pre_process_utterance(utterance)
         print(processed_utterance_tokens)
         print(utterance_meta)
