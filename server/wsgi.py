@@ -10,7 +10,7 @@ app.config['PARSERS'] = {'conala': StandaloneParser(parser_name=config['parser']
                                                     example_processor_name=config['example_processor'],
                                                     beam_size=config['beam_size'],
                                                     reranker_path=config['reranker_path'],
-                                                    cuda=True)}
+                                                    cuda=False)}
 
 if __name__ == "__main__":
     app.run()

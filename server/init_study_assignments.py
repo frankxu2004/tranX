@@ -23,12 +23,15 @@ def check_user_task_exists(col, userid, task):
         return False
 
 
-if __name__ == '__main__':
+def update_database():
     client = MongoClient()
     db = client['tranx']
     collection = db['user_assignments']
-    # collection.delete_many({})
     assignments = get_assignments()
     for assignment in assignments:
         if not check_user_task_exists(collection, assignment['userid'], assignment['task']):
             collection.insert_one(assignment)
+
+
+if __name__ == '__main__':
+    update_database()

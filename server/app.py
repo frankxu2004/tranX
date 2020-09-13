@@ -157,7 +157,7 @@ def allowed_file(filename):
 
 
 def authorized(filename):
-    splits = filename.split('_')
+    splits = filename.rsplit('_', 2)
     if len(splits) == 3:
         userid = splits[0]
         task = splits[1]
@@ -204,6 +204,16 @@ def assign_task():
     for record in collection.find({'userid': userid,
                                    'completion_status': 0}):
         results.append({'task': record['task'], 'use_plugin': record['use_plugin']})
+    return jsonify(results)
+
+
+@app.route("/get_all_userids", methods=['GET'])
+def get_all_userids():
+    db = client['tranx']
+    collection = db['user_assignments']
+    results = []
+    for record in collection.distinct('userid'):
+        results.append(record)
     return jsonify(results)
 
 
