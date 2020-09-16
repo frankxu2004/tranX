@@ -217,6 +217,18 @@ def get_all_userids():
     return jsonify(results)
 
 
+@app.route("/get_all_completed_userids", methods=['GET'])
+def get_all_completed_userids():
+    db = client['tranx']
+    collection = db['user_assignments']
+    results = []
+    for userid in collection.distinct('userid'):
+        if not collection.count({'userid': userid,
+                                 'completion_status': 0}):
+            results.append(userid)
+    return jsonify(results)
+
+
 @app.route("/get_user_status", methods=['POST'])
 def user_task_status():
     req_data = request.get_json()
